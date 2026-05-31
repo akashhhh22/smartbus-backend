@@ -1,6 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
-const User = require("../models/User");
+const User = require("../models/user");
 const { decryptData } = require("../utils/encryption");
 
 const router = express.Router();

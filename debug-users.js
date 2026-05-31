@@ -3,7 +3,7 @@ dotenv.config();
 
 const mongoose = require("mongoose");
 const { decryptData } = require("./utils/encryption");
-const User = require("./models/User");
+const User = require("./models/user");
 
 const MONGO_URI = process.env.MONGO_URI;
 

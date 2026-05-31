@@ -1,7 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-const User = require("../models/User");
+const User = require("../models/user");
 const Wallet = require("../models/Wallet");
 const Transaction = require("../models/Transaction");
 const { decryptData, hashData } = require("../utils/encryption");

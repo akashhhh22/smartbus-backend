@@ -1,6 +1,6 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto"); // Native crypto for HMAC (Razorpay standard)
-const User = require("../models/User");
+const User = require("../models/user");
 const Transaction = require("../models/Transaction");
 const { encryptData } = require("../utils/encryption"); // Use our secure AES encryption
 require("dotenv").config();

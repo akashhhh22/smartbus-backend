@@ -122,7 +122,7 @@ app.use((err, req, res, next) => {
 });
 
 /* ---------------- SOCKET.IO EVENTS ---------------- */
-const User = require("./models/User");
+const User = require("./models/user");
 const Wallet = require("./models/Wallet");
 const { hashData } = require("./utils/encryption");
 
