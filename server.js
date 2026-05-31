@@ -69,11 +69,19 @@ const paymentRoutes = require("./routes/payment");
 
 /* ---------------- ROUTE MAPPING ---------------- */
 app.use("/api/auth", authRoutes);
+console.log('✅ Auth routes mounted at /api/auth');
 app.use("/api/wallet", walletRoutes);
 app.use("/api/rfid", rfidRoutes);
 app.use("/api/passenger", passengerRoutes);
 app.use("/api/conductor", conductorRoutes);
 app.use("/api/payment", paymentRoutes);
+
+/*
+  Final Auth Route Structure:
+  POST /api/auth/login    → loginUser
+  POST /api/auth/signup   → registerUser (note: endpoint is /signup, not /register)
+  GET  /api/auth/me       → getCurrentUser (requires token)
+*/
 
 /* ---------------- ROOT TEST ---------------- */
 app.get("/", (req, res) => {
