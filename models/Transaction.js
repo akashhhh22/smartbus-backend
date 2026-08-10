@@ -21,6 +21,14 @@ const transactionSchema = new mongoose.Schema({
     reference_id: {
         type: String,
         default: null
+    },
+
+    // Deterministic Hash of reference ID (for duplicate checks)
+    reference_hash: {
+        type: String,
+        unique: true,
+        sparse: true,
+        default: null
     }
 
 }, { timestamps: true });

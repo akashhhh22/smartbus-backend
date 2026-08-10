@@ -56,6 +56,24 @@ const UserSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+
+        // ✅ Priority Seating Type
+        priorityType: {
+            type: String,
+            enum: ["NONE", "ELDERLY", "PHYSICALLY_CHALLENGED", "PREGNANT", "MEDICAL_CONDITION"],
+            default: "NONE",
+        },
+
+        // ✅ Late-Night Safety Mode
+        isSafetyModeEnabled: {
+            type: Boolean,
+            default: false,
+        },
+
+        emergencyContact: {
+            name: String,
+            phone: String, // Encrypted if we want, but for now let's keep it simple or use our encryption util
+        },
     },
     { timestamps: true }
 );

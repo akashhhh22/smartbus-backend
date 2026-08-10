@@ -1,8 +1,9 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto"); // Native crypto for HMAC (Razorpay standard)
 const User = require("../models/user");
+const Wallet = require("../models/Wallet");
 const Transaction = require("../models/Transaction");
-const { encryptData } = require("../utils/encryption"); // Use our secure AES encryption
+const { encryptData, hashData } = require("../utils/encryption"); // Use our secure AES encryption
 require("dotenv").config();
 
 // ✅ 1. Validate Environment Variables
@@ -90,13 +91,19 @@ exports.verifyPayment = async (req, res) => {
 
         console.log("✅ Signature Verified. Processing Wallet Recharge...");
 
-        // Fetch Order to ensure we credit the exact amount paid
-        // Note: In production, you might want to check if this order was already processed to prevent double-spending
-        const order = await razorpay.orders.fetch(razorpay_order_id);
+        // Prevent Double Spending: Check if this payment ID was already processed
+        const paymentHash = hashData(razorpay_payment_id);
+        const existingTransaction = await Transaction.findOne({ reference_hash: paymentHash });
+        if (existingTransaction) {
+            console.warn(`⚠️ Duplicate payment attempt blocked: ${razorpay_payment_id}`);
+            return res.status(400).json({ error: "This payment has already been processed" });
+        }
 
+        // Fetch Order to ensure we credit the exact amount paid
+        const order = await razorpay.orders.fetch(razorpay_order_id);
         const amountInRupees = order.amount / 100;
 
-        // Update User Wallet
+        // 1. Update User Model Balance
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -105,17 +112,26 @@ exports.verifyPayment = async (req, res) => {
         user.wallet_balance += amountInRupees;
         await user.save();
 
-        // Save Transaction with ENCRYPTED Reference
+        // 2. Sync to Wallet Model (Source of Truth for Conductor)
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            wallet = new Wallet({ userId, balance: 0 });
+        }
+        wallet.balance = user.wallet_balance; // Ensure they stay in sync
+        await wallet.save();
+
+        // 3. Save Transaction with ENCRYPTED Reference and Deterministic Hash
         const transaction = new Transaction({
             userId: user._id,
             type: "CREDIT",
             amount: amountInRupees,
             description: `Wallet recharge via Razorpay`,
-            reference_id: encryptData(razorpay_payment_id) // Encrypting the Payment ID
+            reference_id: encryptData(razorpay_payment_id),
+            reference_hash: paymentHash
         });
         await transaction.save();
 
-        console.log(`✅ Wallet Recharged for ${user.name}: +₹${amountInRupees}`);
+        console.log(`✅ Wallet Recharged & Synced for ${user.name}: +₹${amountInRupees}`);
 
         res.json({
             success: true,

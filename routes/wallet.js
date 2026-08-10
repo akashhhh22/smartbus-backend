@@ -1,8 +1,21 @@
 const express = require("express");
 const Wallet = require("../models/Wallet");
 const Transaction = require("../models/Transaction");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+/**
+ * GET WALLET BALANCE
+ */
+router.get("/balance", authMiddleware, async (req, res) => {
+  try {
+    const wallet = await Wallet.findOne({ userId: req.user.id });
+    res.json({ balance: wallet ? wallet.balance : 0 });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch balance" });
+  }
+});
 
 /**
  * MOCK TOP-UP (UPI Simulation)
